@@ -1,7 +1,8 @@
-import 'package:dio/dio.dart';
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-import 'package:getxstateman/app/data/repositories/github_repository.dart';
+import 'package:get/instance_manager.dart';
+import 'package:getxstateman/pages/details/details_binding.dart';
 import 'details_controller.dart';
 
 class DetailsPage extends StatefulWidget {
@@ -13,38 +14,54 @@ class DetailsPage extends StatefulWidget {
   State<DetailsPage> createState() => _DetailsPageState();
 }
 
-class _DetailsPageState extends State<DetailsPage> {
+class _DetailsPageState extends State<DetailsPage>
+    with SingleTickerProviderStateMixin {
   late final DetailsController _controller;
+  late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
-    _controller = DetailsController(
-      repository: GithubRepository(
-        dio: Dio(),
-      ),
-    );
+
+    setupDetails();
+
+    _controller = Get.find();
     _controller.getGithubUser(username: widget.username);
+
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    );
+    _animationController.forward();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _animationController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: const Text('Details'),
+    return FadeScaleTransition(
+      animation: _animationController,
+      child: Scaffold(
+        appBar: AppBar(
+          centerTitle: true,
+          title: const Text('Details'),
+        ),
+        body: Obx(() {
+          return _controller.isLoading.value
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : _controller.githubUser == null
+                  ? const Center(
+                      child: Text('User not found.'),
+                    )
+                  : _buildUserInfo();
+        }),
       ),
-      body: Obx(() {
-        return _controller.isLoading.value
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : _controller.githubUser == null
-                ? const Center(
-                    child: Text('User not found.'),
-                  )
-                : _buildUserInfo();
-      }),
     );
   }
 
@@ -54,12 +71,18 @@ class _DetailsPageState extends State<DetailsPage> {
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.network(
-              _controller.githubUser!.avatarUrl,
-              height: 275,
-              width: double.infinity,
+          AnimatedPositioned(
+            duration: const Duration(seconds: 2),
+            curve: Curves.fastOutSlowIn,
+            width: 50,
+            height: 75,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.network(
+                _controller.githubUser!.avatarUrl,
+                height: 275,
+                width: double.infinity,
+              ),
             ),
           ),
           const SizedBox(height: 25),

@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   dio: ^5.1.1
   get: ^4.6.5
+  animations: ^2.0.7
 
 dev_dependencies:
   flutter_test:
@@ -87,6 +88,12 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
+
+  fonts:
+  - family: Poppins
+    fonts:
+      - asset: assets/fonts/Poppins-Regular.ttf
+
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
